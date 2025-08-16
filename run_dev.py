@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Phosphorus development server runner."""
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -11,7 +12,7 @@ def main():
     project_root = Path(__file__).parent
 
     # Change to project directory
-    import os
+
 
     os.chdir(project_root)
 
@@ -19,7 +20,7 @@ def main():
     cmd = [sys.executable, "-m", "src.main"]
 
     try:
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True)  # noqa: S603
     except KeyboardInterrupt:
         print("\nServer stopped by user")
     except subprocess.CalledProcessError as e:
