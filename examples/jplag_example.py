@@ -9,6 +9,7 @@ from src.services.jplag_service import JPlagService
 
 SIMILARITY_THRESHOLD = 0.3  # 30% similarity threshold
 
+
 async def example_jplag_usage():
     """Example of using JPlag service."""
     # Initialize service
