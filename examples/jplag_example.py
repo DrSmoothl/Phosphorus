@@ -7,6 +7,7 @@ from pathlib import Path
 from src.api.jplag_models import PlagiarismAnalysisRequest, ProgrammingLanguage
 from src.services.jplag_service import JPlagService
 
+SIMILARITY_THRESHOLD = 0.3  # 30% similarity threshold
 
 async def example_jplag_usage():
     """Example of using JPlag service."""
@@ -18,7 +19,8 @@ async def example_jplag_usage():
         submission_dir = Path(temp_dir) / "submissions"
         submission_dir.mkdir()
 
-        # Create first submission
+        # Constants
+
         sub1_dir = submission_dir / "submission1"
         sub1_dir.mkdir()
         (sub1_dir / "Main.java").write_text("""
@@ -54,15 +56,15 @@ public class Main {
         (sub3_dir / "Main.java").write_text("""
 public class Calculator {
     private int value;
-    
+
     public Calculator(int initial) {
         this.value = initial;
     }
-    
+
     public int add(int x) {
         return value + x;
     }
-    
+
     public static void main(String[] args) {
         Calculator calc = new Calculator(0);
         System.out.println(calc.add(15));
@@ -96,7 +98,7 @@ public class Calculator {
             print("\nHigh similarity pairs:")
             for pair in result.high_similarity_pairs:
                 avg_sim = pair.similarities.get("AVG", 0)
-                if avg_sim > 0.3:  # Show pairs with >30% similarity
+                if avg_sim > SIMILARITY_THRESHOLD:  # Show pairs with >30% similarity
                     print(
                         f"  {pair.first_submission} vs {pair.second_submission}: {avg_sim:.2f}"
                     )

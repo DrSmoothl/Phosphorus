@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     """Application settings."""
 
     # Server configuration
-    host: str = Field("0.0.0.0", description="Server host")
+    host: str = Field("0.0.0.0", description="Server host")  # noqa: S104
     port: int = Field(8000, description="Server port")
     debug: bool = Field(False, description="Debug mode")
 

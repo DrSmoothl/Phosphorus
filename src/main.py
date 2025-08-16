@@ -1,5 +1,7 @@
 """Main application entry point."""
 
+import logging
+
 import uvicorn
 
 from .common import get_logger, settings, setup_logging
@@ -27,8 +29,6 @@ def main() -> None:
     )
 
     # Override uvicorn loggers to use loguru
-    import logging
-
     logging.getLogger("uvicorn").handlers.clear()
     logging.getLogger("uvicorn.access").handlers.clear()
 

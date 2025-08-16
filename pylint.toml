@@ -1,0 +1,84 @@
+[tool.pylint.main]
+# Specify a score threshold to be exceeded before program exits with error.
+fail-under = 8.0
+
+# Add files or directories to the blacklist.
+ignore = ["tests", "examples", ".venv", "build", "dist"]
+
+# Use multiple processes to speed up Pylint.
+jobs = 0
+
+# Pickle collected data for later comparisons.
+persistent = true
+
+# Minimum Python version to use for version dependent checks.
+py-version = "3.11"
+
+[tool.pylint.messages_control]
+# Disable the message, report, category or checker with the given id(s).
+disable = [
+    "too-few-public-methods",
+    "too-many-arguments",
+    "too-many-instance-attributes",
+    "too-many-locals",
+    "duplicate-code",
+    "import-outside-toplevel",
+    "fixme",
+    "logging-fstring-interpolation",
+]
+
+[tool.pylint.format]
+# Maximum number of characters on a single line.
+max-line-length = 88
+
+[tool.pylint.design]
+# Maximum number of arguments for function / method.
+max-args = 8
+
+# Maximum number of attributes for a class (see R0902).
+max-attributes = 12
+
+# Maximum number of boolean expressions in an if statement (see R0916).
+max-bool-expr = 5
+
+# Maximum number of branch for function / method body.
+max-branches = 15
+
+# Maximum number of locals for function / method body.
+max-locals = 20
+
+# Maximum number of parents for a class (see R0901).
+max-parents = 7
+
+# Maximum number of public methods for a class (see R0904).
+max-public-methods = 25
+
+# Maximum number of return / yield for function / method body.
+max-returns = 8
+
+# Maximum number of statements in function / method body.
+max-statements = 60
+
+# Minimum number of public methods for a class (see R0903).
+min-public-methods = 1
+
+[tool.pylint.similarities]
+# Comments are removed from the similarity computation
+ignore-comments = true
+
+# Docstrings are removed from the similarity computation
+ignore-docstrings = true
+
+# Imports are removed from the similarity computation
+ignore-imports = true
+
+# Signatures are removed from the similarity computation
+ignore-signatures = true
+
+# Minimum lines number of a similarity.
+min-similarity-lines = 6
+
+[tool.pylint.string]
+# This flag controls whether inconsistent-quotes generates a warning when the
+# character used as a quote delimiter is used inconsistently within a module.
+check-quote-consistency = true

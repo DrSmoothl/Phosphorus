@@ -12,6 +12,7 @@ from ..api.jplag_models import (
 )
 from ..api.models import SuccessResponse
 from ..common import get_logger, settings
+from ..common.constants import MIN_FILES_FOR_ANALYSIS
 from ..services import JPlagService
 
 logger = get_logger()
@@ -31,7 +32,7 @@ def get_jplag_service() -> JPlagService:
     summary="Analyze submissions for plagiarism",
     description="Upload multiple source code files and analyze them for plagiarism using JPlag",
 )
-async def analyze_plagiarism(
+async def analyze_plagiarism(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     files: Annotated[
         list[UploadFile], File(description="Source code files to analyze")
     ],
@@ -59,10 +60,10 @@ async def analyze_plagiarism(
             detail="No files provided for analysis",
         )
 
-    if len(files) < 2:
+    if len(files) < MIN_FILES_FOR_ANALYSIS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="At least 2 files are required for comparison",
+            detail=f"At least {MIN_FILES_FOR_ANALYSIS} files are required for comparison",
         )
 
     logger.info(f"Starting plagiarism analysis for {len(files)} files")
@@ -87,10 +88,10 @@ async def analyze_plagiarism(
         )
 
     except Exception as e:
-        logger.error(f"Plagiarism analysis failed: {str(e)}")
+        logger.error(f"Plagiarism analysis failed: {e!s}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Analysis failed: {str(e)}",
+            detail=f"Analysis failed: {e!s}",
         ) from e
 
 
@@ -129,10 +130,10 @@ async def get_detailed_comparison(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to get detailed comparison: {str(e)}")
+        logger.error(f"Failed to get detailed comparison: {e!s}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get comparison: {str(e)}",
+            detail=f"Failed to get comparison: {e!s}",
         ) from e
 
 

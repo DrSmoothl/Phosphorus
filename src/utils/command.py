@@ -9,8 +9,7 @@ async def run_command(
     cwd: str | None = None,
     timeout: int = 300,
 ) -> tuple[int, str, str]:
-    """
-    Run a shell command asynchronously.
+    """Run a shell command asynchronously.
 
     Args:
         command: Command to run (string or list of strings)

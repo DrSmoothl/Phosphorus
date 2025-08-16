@@ -75,7 +75,7 @@ class JPlagService:
         return result
 
     async def get_detailed_comparison(
-        self, analysis_id: str, first_submission: str, second_submission: str
+        self, analysis_id: str, _first_submission: str, _second_submission: str
     ) -> ComparisonResult | None:
         """Get detailed comparison between two submissions.
 
@@ -170,7 +170,7 @@ class JPlagService:
             stderr=asyncio.subprocess.PIPE,
         )
 
-        stdout, stderr = await process.communicate()
+        _, stderr = await process.communicate()
 
         if process.returncode != 0:
             error_msg = stderr.decode() if stderr else "Unknown error"
@@ -190,7 +190,7 @@ class JPlagService:
         self,
         jplag_file_path: str,
         analysis_id: str,
-        request: PlagiarismAnalysisRequest,
+        _request: PlagiarismAnalysisRequest,
     ) -> PlagiarismAnalysisResult:
         """Parse JPlag results file.
 
@@ -270,7 +270,7 @@ class JPlagService:
 
         return data
 
-    async def _build_analysis_result(
+    async def _build_analysis_result(  # pylint: disable=too-many-locals
         self, data: dict[str, Any], analysis_id: str
     ) -> PlagiarismAnalysisResult:
         """Build analysis result from parsed data.

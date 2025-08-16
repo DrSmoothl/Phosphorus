@@ -37,7 +37,7 @@ def add_exception_handlers(app: FastAPI) -> None:
     """Add global exception handlers."""
 
     @app.exception_handler(HTTPException)
-    async def http_exception_handler(request: Request, exc: HTTPException):
+    async def http_exception_handler(_: Request, exc: HTTPException):
         """Handle HTTP exceptions."""
         logger.warning(f"HTTP exception: {exc.status_code} - {exc.detail}")
 
@@ -51,7 +51,7 @@ def add_exception_handlers(app: FastAPI) -> None:
         )
 
     @app.exception_handler(Exception)
-    async def general_exception_handler(request: Request, exc: Exception):
+    async def general_exception_handler(_: Request, exc: Exception):
         """Handle general exceptions."""
         logger.error(f"Unhandled exception: {exc}")
 
