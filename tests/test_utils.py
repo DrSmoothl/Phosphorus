@@ -24,4 +24,3 @@ async def test_run_command_failure():
 
     assert return_code != 0
     assert stderr != ""
-
