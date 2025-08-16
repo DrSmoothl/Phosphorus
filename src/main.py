@@ -28,6 +28,7 @@ def main() -> None:
 
     # Override uvicorn loggers to use loguru
     import logging
+
     logging.getLogger("uvicorn").handlers.clear()
     logging.getLogger("uvicorn.access").handlers.clear()
 

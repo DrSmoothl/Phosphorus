@@ -3,7 +3,7 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 
-from ..api import health_router
+from ..api import health_router, jplag_router
 from ..api.models import ErrorResponse
 from ..common import get_logger, settings
 
@@ -21,6 +21,7 @@ def create_app() -> FastAPI:
 
     # Include routers
     app.include_router(health_router)
+    app.include_router(jplag_router)
 
     # Add exception handlers
     add_exception_handlers(app)
@@ -78,8 +79,6 @@ def add_middleware(app: FastAPI) -> None:
         response = await call_next(request)
 
         process_time = __import__("time").time() - start_time
-        logger.info(
-            f"Response: {response.status_code} - {process_time:.3f}s"
-        )
+        logger.info(f"Response: {response.status_code} - {process_time:.3f}s")
 
         return response

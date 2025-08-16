@@ -38,9 +38,7 @@ async def run_command(
         )
 
     try:
-        stdout, stderr = await asyncio.wait_for(
-            process.communicate(), timeout=timeout
-        )
+        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)
         return_code = process.returncode or 0
     except TimeoutError:
         process.kill()

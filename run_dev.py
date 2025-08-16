@@ -12,6 +12,7 @@ def main():
 
     # Change to project directory
     import os
+
     os.chdir(project_root)
 
     # Run with uv
