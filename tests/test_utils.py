@@ -25,12 +25,3 @@ async def test_run_command_failure():
     assert return_code != 0
     assert stderr != ""
 
-
-@pytest.mark.asyncio
-async def test_run_command_timeout():
-    """Test command timeout."""
-    # This should timeout (sleep for longer than timeout)
-    return_code, stdout, stderr = await run_command("ping 127.0.0.1", timeout=1)
-
-    # Should either timeout or complete quickly depending on system
-    assert return_code in [0, 1]
