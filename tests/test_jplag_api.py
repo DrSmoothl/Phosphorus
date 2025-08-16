@@ -81,7 +81,7 @@ class TestJPlagAPI:
     def test_analyze_plagiarism_no_files(self, client):
         """Test analysis with no files."""
         response = client.post("/api/v1/jplag/analyze", data={"language": "java"})
-        assert response.status_code == 400
+        assert response.status_code == 422  # FastAPI validation error
 
     def test_analyze_plagiarism_insufficient_files(self, client):
         """Test analysis with insufficient files."""
