@@ -79,4 +79,4 @@ Once the server is running, visit:
 
 ## License
 
-[Your License Here]
+[GPL v3.0](./LICENSE)
