@@ -12,7 +12,7 @@ A FastAPI-based server that wraps JPlag command-line tool for plagiarism detecti
 
 1. Clone the repository:
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/DrSmoothl/Phosphorus
 cd Phosphorus
 ```
 
