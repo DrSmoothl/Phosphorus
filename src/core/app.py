@@ -3,7 +3,7 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 
-from ..api import health_router, jplag_router
+from ..api import health_router, hydro_router, jplag_router
 from ..api.models import ErrorResponse
 from ..common import get_logger, settings
 
@@ -22,6 +22,7 @@ def create_app() -> FastAPI:
     # Include routers
     app.include_router(health_router)
     app.include_router(jplag_router)
+    app.include_router(hydro_router)
 
     # Add exception handlers
     add_exception_handlers(app)

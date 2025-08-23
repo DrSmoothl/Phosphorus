@@ -29,6 +29,12 @@ class Settings(BaseSettings):
     )
     jplag_timeout: int = Field(300, description="JPlag execution timeout in seconds")
 
+    # MongoDB configuration
+    mongodb_url: str = Field(
+        "mongodb://localhost:27017", description="MongoDB connection URL"
+    )
+    mongodb_database: str = Field("hydro", description="MongoDB database name")
+
     model_config = {"env_file": ".env", "env_prefix": "PHOSPHORUS_"}
 
 
