@@ -286,12 +286,26 @@ class JPlagService:
         """
         # Parse run information
         run_info_data = data.get("runInformation", {})
+        logger.info(f"Run info data: {run_info_data}")
+
+        failed_submissions_data = run_info_data.get("failedSubmissions", [])
+        logger.info(f"Failed submissions data: {failed_submissions_data}")
+
+        failed_submissions = []
+        for fs in failed_submissions_data:
+            logger.info(f"Processing failed submission: {fs}")
+            try:
+                failed_submission = FailedSubmission(
+                    name=fs.get("name", fs.get("fileName", "unknown")),
+                    state=fs.get("state", fs.get("reason", "unknown"))
+                )
+                failed_submissions.append(failed_submission)
+            except Exception as e:
+                logger.warning(f"Failed to parse failed submission {fs}: {e}")
+
         run_info = RunInformation(
             report_viewer_version=run_info_data.get("reportViewerVersion", "unknown"),
-            failed_submissions=[
-                FailedSubmission(name=fs["name"], state=fs["state"])
-                for fs in run_info_data.get("failedSubmissions", [])
-            ],
+            failed_submissions=failed_submissions,
             submission_date=run_info_data.get("submissionDate", ""),
             duration=run_info_data.get("duration", 0),
             total_comparisons=run_info_data.get("totalComparisons", 0),
