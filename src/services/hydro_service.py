@@ -410,7 +410,19 @@ class HydroService:
         Returns:
             List of plagiarism results
         """
+        logger.info(f"Searching for plagiarism results with contest_id: {contest_id}")
         collection = self.db.check_plagiarism_results
+
+        # Debug: check if collection exists and count total documents
+        total_docs = await collection.count_documents({})
+        logger.info(f"Total documents in check_plagiarism_results collection: {total_docs}")
+
+        # Debug: check documents with any contest_id
+        sample_docs = []
+        async for doc in collection.find({}).limit(5):
+            sample_docs.append(doc.get('contest_id', 'NO_CONTEST_ID'))
+        logger.info(f"Sample contest_ids in collection: {sample_docs}")
+
         cursor = collection.find({"contest_id": contest_id})
 
         results = []
@@ -418,7 +430,9 @@ class HydroService:
             try:
                 result = PlagiarismResult(**doc)
                 results.append(result)
+                logger.info(f"Found plagiarism result: {result.analysis_id}")
             except Exception as e:
                 logger.warning(f"Failed to parse result {doc.get('_id')}: {e}")
 
+        logger.info(f"Returning {len(results)} plagiarism results for contest {contest_id}")
         return results

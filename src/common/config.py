@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     debug: bool = Field(False, description="Debug mode")
 
     # Logging configuration
-    log_level: str = Field("INFO", description="Log level")
+    log_level: str = Field("DEBUG", description="Log level")
     log_file: str | None = Field(None, description="Log file path")
 
     # API configuration
