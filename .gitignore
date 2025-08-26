@@ -59,4 +59,9 @@ temp/
 output/
 jplag_results/
 
-FrontendHydroPlugin/
+# Frontend Plugin - keep plugin but ignore build artifacts
+FrontendHydroPlugin/node_modules/
+FrontendHydroPlugin/.env
+FrontendHydroPlugin/dist/
+FrontendHydroPlugin/*.js
+FrontendHydroPlugin/*.js.map

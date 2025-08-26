@@ -1,0 +1,15 @@
+{
+  "name": "hydro-phosphorus-plugin",
+  "version": "1.0.0",
+  "description": "Hydro OJ Plugin for Phosphorus Plagiarism Detection",
+  "main": "index.ts",
+  "author": "Phosphorus Contributors",
+  "license": "GPL-3.0",
+  "keywords": ["hydro", "plagiarism", "jplag", "phosphorus"],
+  "dependencies": {
+    "@hydrooj/utils": "*"
+  },
+  "hydrooj": {
+    "addon": true
+  }
+}
