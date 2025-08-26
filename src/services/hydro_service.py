@@ -1,13 +1,11 @@
 """Hydro OJ integration service."""
 
-import io
 import tempfile
 import uuid
 from pathlib import Path
 from typing import Any
 
 from bson import ObjectId
-from fastapi import UploadFile
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from ..api.hydro_models import (
@@ -374,20 +372,12 @@ class HydroService:
         Returns:
             JPlag analysis result
         """
-        # Create fake upload files from directory contents
-        fake_files = []
-        for submission_dir in Path(directory).iterdir():
-            if submission_dir.is_dir():
-                for file_path in submission_dir.iterdir():
-                    if file_path.is_file():
-                        content = file_path.read_bytes()
-                        fake_file = UploadFile(
-                            filename=f"{submission_dir.name}_{file_path.name}",
-                            file=io.BytesIO(content),
-                        )
-                        fake_files.append(fake_file)
-
-        return await self.jplag_service.analyze_submissions(fake_files, request)
+        # Directly use the JPlag service's internal _run_jplag method
+        with tempfile.TemporaryDirectory() as temp_dir:
+            result_file = await self.jplag_service._run_jplag(
+                directory, request, temp_dir, analysis_id
+            )
+            return await self.jplag_service._parse_results(result_file)
 
     async def _save_plagiarism_result(self, result: PlagiarismResult) -> None:
         """Save plagiarism result to database.
