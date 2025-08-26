@@ -60,3 +60,4 @@ output/
 jplag_results/
 
 FrontendHydroPlugin/
+node_modules/
