@@ -1,5 +1,7 @@
 """Hydro OJ integration service."""
 
+import asyncio
+import os
 import tempfile
 import uuid
 from pathlib import Path
@@ -372,13 +374,52 @@ class HydroService:
         Returns:
             JPlag analysis result
         """
-        # Directly use the JPlag service's internal _run_jplag method
         with tempfile.TemporaryDirectory() as temp_dir:
-            result_file = await self.jplag_service._run_jplag(
-                directory, request, temp_dir, analysis_id
+            result_file = os.path.join(temp_dir, f"result_{analysis_id}")
+
+            # Build JPlag command
+            cmd = [
+                "java",
+                "-jar",
+                self.jplag_service.jplag_jar_path,
+                "--mode",
+                "run",  # Prevent GUI launcher in server environment
+                "-l",
+                request.language.value,
+                "-r",
+                result_file,
+                "-t",
+                str(request.min_tokens),
+                "-m",
+                str(request.similarity_threshold),
+                directory,
+            ]
+
+            if request.normalize_tokens:
+                cmd.append("--normalize")
+
+            logger.info(f"Running JPlag: {' '.join(cmd)}")
+
+            # Run JPlag asynchronously
+            process = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
+
+            stdout, stderr = await process.communicate()
+
+            if process.returncode != 0:
+                error_msg = stderr.decode() if stderr else "Unknown error"
+                logger.error(f"JPlag failed: {error_msg}")
+                raise RuntimeError(f"JPlag execution failed: {error_msg}")
+
+            logger.info("JPlag completed successfully")
+            
+            # Parse results using JPlag service
+            jplag_file = f"{result_file}.jplag"
             return await self.jplag_service._parse_jplag_results(
-                result_file, analysis_id, request
+                jplag_file, analysis_id, request
             )
 
     async def _save_plagiarism_result(self, result: PlagiarismResult) -> None:
