@@ -374,53 +374,58 @@ class HydroService:
         Returns:
             JPlag analysis result
         """
-        with tempfile.TemporaryDirectory() as temp_dir:
-            result_file = os.path.join(temp_dir, f"result_{analysis_id}")
+        try:
+            with tempfile.TemporaryDirectory() as temp_dir:
+                result_file = os.path.join(temp_dir, f"result_{analysis_id}")
 
-            # Build JPlag command
-            cmd = [
-                "java",
-                "-jar",
-                self.jplag_service.jplag_jar_path,
-                "--mode",
-                "run",  # Prevent GUI launcher in server environment
-                "-l",
-                request.language.value,
-                "-r",
-                result_file,
-                "-t",
-                str(request.min_tokens),
-                "-m",
-                str(request.similarity_threshold),
-                directory,
-            ]
+                # Build JPlag command
+                cmd = [
+                    "java",
+                    "-jar",
+                    self.jplag_service.jplag_jar_path,
+                    "--mode",
+                    "run",  # Prevent GUI launcher in server environment
+                    "-l",
+                    request.language.value,
+                    "-r",
+                    result_file,
+                    "-t",
+                    str(request.min_tokens),
+                    "-m",
+                    str(request.similarity_threshold),
+                    directory,
+                ]
 
-            if request.normalize_tokens:
-                cmd.append("--normalize")
+                if request.normalize_tokens:
+                    cmd.append("--normalize")
 
-            logger.info(f"Running JPlag: {' '.join(cmd)}")
+                logger.info(f"Running JPlag: {' '.join(cmd)}")
 
-            # Run JPlag asynchronously
-            process = await asyncio.create_subprocess_exec(
-                *cmd,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
+                # Run JPlag asynchronously
+                process = await asyncio.create_subprocess_exec(
+                    *cmd,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                )
 
-            stdout, stderr = await process.communicate()
+                stdout, stderr = await process.communicate()
 
-            if process.returncode != 0:
-                error_msg = stderr.decode() if stderr else "Unknown error"
-                logger.error(f"JPlag failed: {error_msg}")
-                raise RuntimeError(f"JPlag execution failed: {error_msg}")
+                if process.returncode != 0:
+                    error_msg = stderr.decode() if stderr else "Unknown error"
+                    logger.error(f"JPlag failed: {error_msg}")
+                    raise RuntimeError(f"JPlag execution failed: {error_msg}")
 
-            logger.info("JPlag completed successfully")
-            
-            # Parse results using JPlag service
-            jplag_file = f"{result_file}.jplag"
-            return await self.jplag_service._parse_jplag_results(
-                jplag_file, analysis_id, request
-            )
+                logger.info("JPlag completed successfully")
+
+                # Parse results using JPlag service
+                jplag_file = f"{result_file}.jplag"
+                logger.info(f"Parsing JPlag results from: {jplag_file}")
+                return await self.jplag_service._parse_jplag_results(
+                    jplag_file, analysis_id, request
+                )
+        except Exception as e:
+            logger.error(f"Error in _run_jplag_on_directory: {e}", exc_info=True)
+            raise
 
     async def _save_plagiarism_result(self, result: PlagiarismResult) -> None:
         """Save plagiarism result to database.
