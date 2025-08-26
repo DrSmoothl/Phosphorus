@@ -296,8 +296,8 @@ class JPlagService:
             logger.info(f"Processing failed submission: {fs}")
             try:
                 failed_submission = FailedSubmission(
-                    name=fs.get("name", fs.get("fileName", "unknown")),
-                    state=fs.get("state", fs.get("reason", "unknown"))
+                    name=fs.get("submissionId", fs.get("name", "unknown")),
+                    state=fs.get("submissionState", fs.get("state", "unknown"))
                 )
                 failed_submissions.append(failed_submission)
             except Exception as e:
@@ -306,8 +306,8 @@ class JPlagService:
         run_info = RunInformation(
             report_viewer_version=run_info_data.get("reportViewerVersion", "unknown"),
             failed_submissions=failed_submissions,
-            submission_date=run_info_data.get("submissionDate", ""),
-            duration=run_info_data.get("duration", 0),
+            submission_date=run_info_data.get("dateOfExecution", run_info_data.get("submissionDate", "")),
+            duration=run_info_data.get("executionTime", run_info_data.get("duration", 0)),
             total_comparisons=run_info_data.get("totalComparisons", 0),
         )
 
@@ -324,15 +324,21 @@ class JPlagService:
 
         # Parse clusters
         cluster_data = data.get("cluster", [])
-        clusters = [
-            ClusterInfo(
-                index=cluster["index"],
-                average_similarity=cluster["averageSimilarity"],
-                strength=cluster["strength"],
-                members=cluster["members"],
-            )
-            for cluster in cluster_data
-        ]
+        logger.info(f"Cluster data: {cluster_data}")
+        
+        clusters = []
+        for cluster in cluster_data:
+            logger.info(f"Processing cluster: {cluster}")
+            try:
+                cluster_info = ClusterInfo(
+                    index=cluster.get("index", 0),
+                    average_similarity=cluster.get("averageSimilarity", 0.0),
+                    strength=cluster.get("strength", 0.0),
+                    members=cluster.get("members", []),
+                )
+                clusters.append(cluster_info)
+            except Exception as e:
+                logger.warning(f"Failed to parse cluster {cluster}: {e}")
 
         # Parse submission statistics
         submission_mappings = data.get("submissionMappings", {})
