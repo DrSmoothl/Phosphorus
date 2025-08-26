@@ -147,6 +147,8 @@ class JPlagService:
             "java",
             "-jar",
             self.jplag_jar_path,
+            "--mode",
+            "run",  # Prevent GUI launcher in server environment
             "-l",
             request.language.value,
             "-r",
