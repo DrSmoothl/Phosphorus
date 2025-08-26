@@ -377,7 +377,9 @@ class HydroService:
             result_file = await self.jplag_service._run_jplag(
                 directory, request, temp_dir, analysis_id
             )
-            return await self.jplag_service._parse_jplag_results(result_file)
+            return await self.jplag_service._parse_jplag_results(
+                result_file, analysis_id, request
+            )
 
     async def _save_plagiarism_result(self, result: PlagiarismResult) -> None:
         """Save plagiarism result to database.
