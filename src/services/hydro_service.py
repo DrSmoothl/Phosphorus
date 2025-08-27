@@ -576,7 +576,24 @@ class HydroService:
             contest_id = doc["_id"]
 
             # Get contest information from contest collection
-            contest_doc = await self.db.contest.find_one({"_id": ObjectId(contest_id)})
+            # 尝试多种方式查找比赛
+            contest_doc = None
+            
+            # 方式1：如果contest_id是字符串，尝试转换为ObjectId
+            if isinstance(contest_id, str):
+                try:
+                    contest_doc = await self.db.contest.find_one({"_id": ObjectId(contest_id)})
+                except Exception:
+                    # 如果ObjectId转换失败，直接用字符串查找
+                    contest_doc = await self.db.contest.find_one({"_id": contest_id})
+            else:
+                # 如果contest_id已经是ObjectId，直接使用
+                try:
+                    contest_doc = await self.db.contest.find_one({"_id": contest_id})
+                except Exception:
+                    # 如果还是失败，转换为字符串再试
+                    contest_doc = await self.db.contest.find_one({"_id": str(contest_id)})
+                    
             if contest_doc:
                 # Count problems that have been checked
                 checked_problems = await collection.count_documents(
