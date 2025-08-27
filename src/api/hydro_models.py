@@ -74,6 +74,51 @@ class ContestPlagiarismRequest(BaseModel):
     )
 
 
+class ContestProblemSelectionRequest(BaseModel):
+    """Request for contest problem selection plagiarism check."""
+
+    contest_id: str = Field(..., description="Contest ID")
+    problem_ids: list[int] = Field(..., description="Selected problem IDs to check")
+    min_tokens: int = Field(default=9, ge=1, le=100, description="Minimum token match")
+    similarity_threshold: float = Field(
+        default=0.0, ge=0.0, le=1.0, description="Similarity threshold"
+    )
+
+
+class ContestInfo(BaseModel):
+    """Contest information."""
+
+    id: str = Field(..., description="Contest ID")
+    title: str = Field(..., description="Contest title")
+    description: str = Field(..., description="Contest description")
+    begin_at: datetime = Field(..., description="Contest start time")
+    end_at: datetime = Field(..., description="Contest end time")
+    total_problems: int = Field(..., description="Total number of problems")
+    checked_problems: int = Field(default=0, description="Number of checked problems")
+    last_check_at: datetime | None = Field(None, description="Last check timestamp")
+
+
+class ProblemInfo(BaseModel):
+    """Problem information."""
+
+    id: int = Field(..., description="Problem ID")
+    title: str = Field(..., description="Problem title")
+    total_submissions: int = Field(..., description="Total submissions")
+    accepted_submissions: int = Field(..., description="Accepted submissions")
+    languages: list[str] = Field(..., description="Programming languages used")
+    last_check_at: datetime | None = Field(None, description="Last check timestamp")
+
+
+class LanguageStats(BaseModel):
+    """Language statistics for a problem."""
+
+    language: str = Field(..., description="Programming language")
+    submission_count: int = Field(..., description="Number of submissions")
+    unique_users: int = Field(..., description="Number of unique users")
+    jplag_language: str = Field(..., description="Corresponding JPlag language")
+    can_analyze: bool = Field(..., description="Whether this language can be analyzed")
+
+
 class PlagiarismResult(BaseModel):
     """Plagiarism check result."""
 
