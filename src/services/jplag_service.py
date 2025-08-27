@@ -297,7 +297,7 @@ class JPlagService:
             try:
                 failed_submission = FailedSubmission(
                     name=fs.get("submissionId", fs.get("name", "unknown")),
-                    state=fs.get("submissionState", fs.get("state", "unknown"))
+                    state=fs.get("submissionState", fs.get("state", "unknown")),
                 )
                 failed_submissions.append(failed_submission)
             except Exception as e:
@@ -306,8 +306,12 @@ class JPlagService:
         run_info = RunInformation(
             report_viewer_version=run_info_data.get("reportViewerVersion", "unknown"),
             failed_submissions=failed_submissions,
-            submission_date=run_info_data.get("dateOfExecution", run_info_data.get("submissionDate", "")),
-            duration=run_info_data.get("executionTime", run_info_data.get("duration", 0)),
+            submission_date=run_info_data.get(
+                "dateOfExecution", run_info_data.get("submissionDate", "")
+            ),
+            duration=run_info_data.get(
+                "executionTime", run_info_data.get("duration", 0)
+            ),
             total_comparisons=run_info_data.get("totalComparisons", 0),
         )
 
@@ -325,7 +329,7 @@ class JPlagService:
         # Parse clusters
         cluster_data = data.get("cluster", [])
         logger.info(f"Cluster data: {cluster_data}")
-        
+
         clusters = []
         for cluster in cluster_data:
             logger.info(f"Processing cluster: {cluster}")

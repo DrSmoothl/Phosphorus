@@ -457,12 +457,14 @@ class HydroService:
 
         # Debug: check if collection exists and count total documents
         total_docs = await collection.count_documents({})
-        logger.info(f"Total documents in check_plagiarism_results collection: {total_docs}")
+        logger.info(
+            f"Total documents in check_plagiarism_results collection: {total_docs}"
+        )
 
         # Debug: check documents with any contest_id
         sample_docs = []
         async for doc in collection.find({}).limit(5):
-            sample_docs.append(doc.get('contest_id', 'NO_CONTEST_ID'))
+            sample_docs.append(doc.get("contest_id", "NO_CONTEST_ID"))
         logger.info(f"Sample contest_ids in collection: {sample_docs}")
 
         cursor = collection.find({"contest_id": contest_id})
@@ -476,7 +478,9 @@ class HydroService:
             except Exception as e:
                 logger.warning(f"Failed to parse result {doc.get('_id')}: {e}")
 
-        logger.info(f"Returning {len(results)} plagiarism results for contest {contest_id}")
+        logger.info(
+            f"Returning {len(results)} plagiarism results for contest {contest_id}"
+        )
         return results
 
     async def check_contest_problems_plagiarism(
@@ -491,7 +495,9 @@ class HydroService:
             List of plagiarism analysis results
         """
         contest_id = ObjectId(request.contest_id)
-        logger.info(f"Starting plagiarism check for contest {contest_id} with problems {request.problem_ids}")
+        logger.info(
+            f"Starting plagiarism check for contest {contest_id} with problems {request.problem_ids}"
+        )
 
         # Get all accepted submissions for this contest
         submissions = await self._get_contest_submissions(contest_id)
@@ -501,7 +507,9 @@ class HydroService:
         # Filter submissions by selected problems
         filtered_submissions = [s for s in submissions if s.pid in request.problem_ids]
         if not filtered_submissions:
-            raise ValueError(f"No submissions found for selected problems {request.problem_ids}")
+            raise ValueError(
+                f"No submissions found for selected problems {request.problem_ids}"
+            )
 
         # Group submissions by problem
         problems = self._group_submissions_by_problem(filtered_submissions)
@@ -528,7 +536,7 @@ class HydroService:
             analysis_request = ContestPlagiarismRequest(
                 contest_id=request.contest_id,
                 min_tokens=request.min_tokens,
-                similarity_threshold=request.similarity_threshold
+                similarity_threshold=request.similarity_threshold,
             )
 
             # Create analysis for this problem
@@ -549,24 +557,32 @@ class HydroService:
             List of contest information
         """
         logger.info("Getting all contests with plagiarism results")
-        
+
         # Get unique contest IDs from plagiarism results
         collection = self.db.check_plagiarism_results
         pipeline = [
-            {"$group": {"_id": "$contest_id", "count": {"$sum": 1}, "last_check": {"$max": "$created_at"}}},
-            {"$sort": {"last_check": -1}}
+            {
+                "$group": {
+                    "_id": "$contest_id",
+                    "count": {"$sum": 1},
+                    "last_check": {"$max": "$created_at"},
+                }
+            },
+            {"$sort": {"last_check": -1}},
         ]
-        
+
         contest_results = []
         async for doc in collection.aggregate(pipeline):
             contest_id = doc["_id"]
-            
+
             # Get contest information from contest collection
             contest_doc = await self.db.contest.find_one({"_id": ObjectId(contest_id)})
             if contest_doc:
                 # Count problems that have been checked
-                checked_problems = await collection.count_documents({"contest_id": contest_id})
-                
+                checked_problems = await collection.count_documents(
+                    {"contest_id": contest_id}
+                )
+
                 contest_info = ContestInfo(
                     id=contest_id,
                     title=contest_doc.get("title", "Unknown Contest"),
@@ -575,7 +591,7 @@ class HydroService:
                     end_at=contest_doc.get("endAt"),
                     total_problems=len(contest_doc.get("pids", [])),
                     checked_problems=checked_problems,
-                    last_check_at=doc["last_check"]
+                    last_check_at=doc["last_check"],
                 )
                 contest_results.append(contest_info)
 
@@ -591,9 +607,9 @@ class HydroService:
             List of problem information
         """
         logger.info(f"Getting problems for contest {contest_id}")
-        
+
         contest_oid = ObjectId(contest_id)
-        
+
         # Get contest document to get problem IDs
         contest_doc = await self.db.contest.find_one({"_id": contest_oid})
         if not contest_doc:
@@ -609,22 +625,29 @@ class HydroService:
                 continue
 
             # Count submissions for this problem in this contest
-            total_submissions = await self.db.record.count_documents({
-                "contest": contest_oid,
-                "pid": problem_id
-            })
+            total_submissions = await self.db.record.count_documents(
+                {"contest": contest_oid, "pid": problem_id}
+            )
 
-            accepted_submissions = await self.db.record.count_documents({
-                "contest": contest_oid,
-                "pid": problem_id,
-                "status": SubmissionStatus.ACCEPTED
-            })
+            accepted_submissions = await self.db.record.count_documents(
+                {
+                    "contest": contest_oid,
+                    "pid": problem_id,
+                    "status": SubmissionStatus.ACCEPTED,
+                }
+            )
 
             # Get distinct languages used
             pipeline = [
-                {"$match": {"contest": contest_oid, "pid": problem_id, "status": SubmissionStatus.ACCEPTED}},
+                {
+                    "$match": {
+                        "contest": contest_oid,
+                        "pid": problem_id,
+                        "status": SubmissionStatus.ACCEPTED,
+                    }
+                },
                 {"$group": {"_id": "$lang"}},
-                {"$sort": {"_id": 1}}
+                {"$sort": {"_id": 1}},
             ]
             languages = []
             async for doc in self.db.record.aggregate(pipeline):
@@ -634,7 +657,7 @@ class HydroService:
             last_check = None
             plagiarism_result = await self.db.check_plagiarism_results.find_one(
                 {"contest_id": contest_id, "problem_id": problem_id},
-                sort=[("created_at", -1)]
+                sort=[("created_at", -1)],
             )
             if plagiarism_result:
                 last_check = plagiarism_result["created_at"]
@@ -645,13 +668,15 @@ class HydroService:
                 total_submissions=total_submissions,
                 accepted_submissions=accepted_submissions,
                 languages=languages,
-                last_check_at=last_check
+                last_check_at=last_check,
             )
             problems.append(problem_info)
 
         return problems
 
-    async def get_problem_language_stats(self, contest_id: str, problem_id: int) -> list[LanguageStats]:
+    async def get_problem_language_stats(
+        self, contest_id: str, problem_id: int
+    ) -> list[LanguageStats]:
         """Get language usage statistics for a problem.
 
         Args:
@@ -661,56 +686,61 @@ class HydroService:
         Returns:
             List of language statistics
         """
-        logger.info(f"Getting language stats for problem {problem_id} in contest {contest_id}")
-        
+        logger.info(
+            f"Getting language stats for problem {problem_id} in contest {contest_id}"
+        )
+
         contest_oid = ObjectId(contest_id)
-        
+
         # Aggregate language usage
         pipeline = [
             {
                 "$match": {
                     "contest": contest_oid,
                     "pid": problem_id,
-                    "status": SubmissionStatus.ACCEPTED
+                    "status": SubmissionStatus.ACCEPTED,
                 }
             },
             {
                 "$group": {
                     "_id": "$lang",
                     "submission_count": {"$sum": 1},
-                    "unique_users": {"$addToSet": "$uid"}
+                    "unique_users": {"$addToSet": "$uid"},
                 }
             },
             {
                 "$project": {
                     "language": "$_id",
                     "submission_count": 1,
-                    "unique_users": {"$size": "$unique_users"}
+                    "unique_users": {"$size": "$unique_users"},
                 }
             },
-            {
-                "$sort": {"submission_count": -1}
-            }
+            {"$sort": {"submission_count": -1}},
         ]
 
         stats = []
         async for doc in self.db.record.aggregate(pipeline):
             language = doc["language"]
             jplag_language = self._detect_programming_language(language)
-            can_analyze = jplag_language != ProgrammingLanguage.TEXT and doc["submission_count"] >= MIN_SUBMISSIONS_FOR_ANALYSIS
+            can_analyze = (
+                jplag_language != ProgrammingLanguage.TEXT
+                and doc["submission_count"] >= MIN_SUBMISSIONS_FOR_ANALYSIS
+            )
 
             stat = LanguageStats(
                 language=language,
                 submission_count=doc["submission_count"],
                 unique_users=doc["unique_users"],
                 jplag_language=jplag_language.value,
-                can_analyze=can_analyze
+                can_analyze=can_analyze,
             )
             stats.append(stat)
 
         return stats
 
-    async def get_problem_plagiarism_result(self, contest_id: str, problem_id: int) -> PlagiarismResult | None:
+    async def get_problem_plagiarism_result(
+        self, contest_id: str, problem_id: int
+    ) -> PlagiarismResult | None:
         """Get plagiarism result for a specific problem.
 
         Args:
@@ -720,14 +750,16 @@ class HydroService:
         Returns:
             Plagiarism result or None if not found
         """
-        logger.info(f"Getting plagiarism result for problem {problem_id} in contest {contest_id}")
-        
+        logger.info(
+            f"Getting plagiarism result for problem {problem_id} in contest {contest_id}"
+        )
+
         collection = self.db.check_plagiarism_results
         doc = await collection.find_one(
             {"contest_id": contest_id, "problem_id": problem_id},
-            sort=[("created_at", -1)]  # Get the most recent result
+            sort=[("created_at", -1)],  # Get the most recent result
         )
-        
+
         if doc:
             return PlagiarismResult(**doc)
         return None
